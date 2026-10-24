@@ -183,19 +183,26 @@ docker compose logs -f frontend
 
 ## How the workflow works
 
-1. A permitted user creates a capital project for an assigned property.
-2. The project starts in `draft`.
-3. The project owner submits it:
+Each property operates as a controlled request origin. A permitted property
+manager or organization user creates a spend request for that property, submits
+it for review, and the request moves through the approval chain. Managers and
+authorized approvers review the request, while the Lead Admin can monitor and
+make the final decision across the entire platform.
+
+1. A permitted property manager or organization user creates a capital spend request for an assigned property.
+2. The request starts in `draft`.
+3. The request owner submits it:
    `draft -> submitted`.
-4. Authorized reviewers advance it through:
+4. Managers and authorized reviewers advance it through:
    `submitted -> manager_review -> finance_review -> approved`.
-5. A permitted approver can reject a project from an active workflow state.
-6. Each transition is performed transactionally and checks the project version
+5. The Lead Admin can advance every stage and make the final approval decision from `finance_review`.
+6. A permitted manager or approver can reject a request from an active review state.
+7. Each transition is performed transactionally and checks the project version
    to prevent stale concurrent updates.
-7. Analytics are refreshed in the background and the dashboard receives
+8. Analytics are refreshed in the background and the dashboard receives
    tenant-scoped update events.
 
-The The Lead Admin can review and act across the complete platform. Regular users only
+The Lead Admin can review and act across the complete platform. Regular users only
 see data permitted by their organization, properties, and role.
 
 ## Lead Admin administration
@@ -289,6 +296,5 @@ runtime.
 Before using this application outside a demo environment, replace the demo
 passwords, configure secret keys and allowed origins, add production
 observability, and review retention, backup, and deployment policies.
-
 
 

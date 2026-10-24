@@ -39,20 +39,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         if request.query_params.get("recent_mix") == "true":
             statuses = ["draft", "submitted", "manager_review", "finance_review", "approved", "rejected"]
-            recent_by_status = [
-                list(self.get_queryset().filter(status=status)[:2])
-                for status in statuses
-            ]
             projects = [
                 project
-                for index in range(2)
-                for projects_for_status in recent_by_status
-                for project in projects_for_status[index:index + 1]
+                for status in statuses
+                for project in self.get_queryset().filter(status=status)[:2]
             ]
             return Response({
                 "count": len(projects),
-                "next": None,
-                "previous": None,
                 "results": ProjectSerializer(projects, many=True).data,
             })
         return super().list(request, *args, **kwargs)

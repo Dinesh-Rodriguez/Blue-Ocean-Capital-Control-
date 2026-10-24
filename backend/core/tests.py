@@ -32,4 +32,6 @@ class PlatformTests(TestCase):
         self.assertEqual(transitioned.status, "manager_review")
         with self.assertRaises(ValueError):
             transition_project(project.id, user, "approve", 0)
-
+        draft = Project.objects.create(organization=self.org_b, property=self.property_b, title="draft", category="IT", fiscal_period="FY2026", budget_amount=10)
+        with self.assertRaises(ValueError):
+            transition_project(draft.id, user, "reject", 0)
