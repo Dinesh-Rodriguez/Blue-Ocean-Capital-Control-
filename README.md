@@ -1,4 +1,4 @@
-# Blue Ocean Capital Control
+﻿# Blue Ocean Capital Control
 
 Blue Ocean Capital Control is a multi-tenant capital expenditure platform for
 hotels, buildings, and operating entities. It brings project budgets, actual
@@ -8,22 +8,22 @@ workspace.
 The application has two operating levels:
 
 - **Entity users** work within their organization and assigned properties.
-- **Boss** has platform-wide authority across every organization, property,
+- **Lead Admin** has platform-wide authority across every organization, property,
   project, user, approval, and confidential profit metric.
 
 ## Product tour
 
-### Boss command center
+### Lead Admin command center
 
-The Boss dashboard provides a portfolio-wide view of financial performance,
+The Lead Admin dashboard provides a portfolio-wide view of financial performance,
 approval exposure, entity governance, user administration, and current capital
 projects.
 
-![Boss command center](docs/screenshots/boss-command-center.png)
+![Lead Admin command center](docs/screenshots/boss-command-center.png)
 
 ### Entity and user governance
 
-The Boss can create and remove operating entities, review confidential
+The The Lead Admin can create and remove operating entities, review confidential
 profitability, and manage the complete platform user directory.
 
 ![Entity and user governance](docs/screenshots/entity-and-user-governance.png)
@@ -50,10 +50,10 @@ are summarized for the signed-in user's authorized scope.
 - Role-based permissions enforced by the API.
 - Project creation, editing, submission, approval, rejection, and version
   conflict protection.
-- Boss-only global project and analytics visibility.
-- Boss-only consolidated profit reporting.
-- Boss organization management: add, update, and remove entities.
-- Boss user management: add users, assign roles and organizations, and remove
+- Platform-administrator-only global project and analytics visibility.
+- Platform-administrator-only consolidated profit reporting.
+- Organization management: add, update, and remove entities.
+- Lead Admin user management: add users, assign roles and organizations, and remove
   platform users.
 - Budget and actual-spend analytics with category breakdowns.
 - CSV exports for project, budget, variance, and approval registers.
@@ -65,7 +65,7 @@ are summarized for the signed-in user's authorized scope.
 
 | Role | Scope | Typical capabilities |
 | --- | --- | --- |
-| `super_admin` | Entire platform | Full Boss authority, including entities, users, projects, approvals, analytics, and confidential profits |
+| `super_admin` | Entire platform | Full Lead Admin authority, including entities, users, projects, approvals, analytics, and confidential profits |
 | `org_admin` | One organization | Manage projects and view organization-wide budgets and analytics |
 | `property_manager` | Assigned properties | Create and manage projects for assigned properties |
 | `approver` | Authorized organization/properties | Advance approval workflows and reject requests |
@@ -82,14 +82,14 @@ All seeded demo accounts use the password:
 Passw0rd!
 ```
 
-### Boss account
+### Lead Admin account
 
 ```text
 Email:    boss@blueocean.example.com
 Password: Passw0rd!
 ```
 
-The Boss account is not assigned to an organization. It receives global scope
+The Lead Admin account is not assigned to an organization. It receives global scope
 through the `super_admin` role.
 
 ### Example organization accounts
@@ -102,7 +102,7 @@ view6@org1.example.com   - viewer
 ```
 
 The seed dataset contains additional users across the configured
-organizations. The exact directory can be viewed from the Boss
+organizations. The exact directory can be viewed from the platform administration
 administration panel.
 
 ## Running the application
@@ -150,7 +150,7 @@ docker compose cp seed_data api:/tmp/seed_data
 docker compose exec api python manage.py load_seed /tmp/seed_data
 ```
 
-Create or repair the Boss account:
+Create or repair the Lead Admin account:
 
 ```powershell
 docker compose exec api python manage.py create_boss
@@ -195,12 +195,12 @@ docker compose logs -f frontend
 7. Analytics are refreshed in the background and the dashboard receives
    tenant-scoped update events.
 
-The Boss can review and act across the complete platform. Regular users only
+The The Lead Admin can review and act across the complete platform. Regular users only
 see data permitted by their organization, properties, and role.
 
-## Boss administration
+## Lead Admin administration
 
-From **Boss administration**, the `super_admin` account can:
+From **Lead Admin administration**, the `super_admin` account can:
 
 - Add, update, and remove hotels or buildings.
 - View confidential entity profit amounts and consolidated profit.
@@ -210,7 +210,7 @@ From **Boss administration**, the `super_admin` account can:
 - Manage projects and approval actions globally.
 - Export platform registers for operational review.
 
-The active Boss account is protected from accidental self-removal in the
+The active Lead Admin account is protected from accidental self-removal in the
 dashboard. The API also restricts all platform user and organization
 administration endpoints to `super_admin`.
 
@@ -226,14 +226,14 @@ The API is served from `http://localhost:8000/api`.
 | `POST /projects/{id}/submit/` | Submit a draft project |
 | `POST /projects/{id}/approve/` | Advance or reject an approval |
 | `GET /analytics/` | Return scoped analytics |
-| `GET /organizations/` | Boss organization directory |
-| `POST /organizations/` | Boss entity creation |
-| `PATCH /organizations/{id}/` | Boss entity update |
-| `DELETE /organizations/{id}/` | Boss entity removal |
-| `GET /platform/users/` | Boss platform user directory |
-| `POST /platform/users/` | Boss user creation |
-| `PATCH /platform/users/{id}/` | Boss user role/scope update |
-| `DELETE /platform/users/{id}/` | Boss user removal |
+| `GET /organizations/` | Organization directory |
+| `POST /organizations/` | Lead Admin entity creation |
+| `PATCH /organizations/{id}/` | Lead Admin entity update |
+| `DELETE /organizations/{id}/` | Lead Admin entity removal |
+| `GET /platform/users/` | Lead Admin user directory |
+| `POST /platform/users/` | Platform user creation |
+| `PATCH /platform/users/{id}/` | Platform user role/scope update |
+| `DELETE /platform/users/{id}/` | Platform user removal |
 
 All protected endpoints require:
 
@@ -289,3 +289,6 @@ runtime.
 Before using this application outside a demo environment, replace the demo
 passwords, configure secret keys and allowed origins, add production
 observability, and review retention, backup, and deployment policies.
+
+
+
