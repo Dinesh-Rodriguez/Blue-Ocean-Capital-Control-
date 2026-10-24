@@ -4,6 +4,7 @@ from channels.layers import get_channel_layer
 from django.contrib.auth import authenticate
 from kombu.exceptions import OperationalError
 from rest_framework import status, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -29,25 +30,23 @@ def login(request):
                      "user": {"id": user.id, "email": user.email, "role": user.profile.role,
                               "organization_id": user.profile.organization_id}})
 
+class ProjectPagination(PageNumberPagination):
+    page_size_query_param = "page_size"
+    max_page_size = 50
+
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = ProjectPagination
 
     def get_queryset(self):
-        return scoped_projects(self.request.user).select_related("property").order_by("-updated_at", "-id")
+        queryset = scoped_projects(self.request.user).select_related("property").order_by("-updated_at", "-id")
+        project_status = self.request.query_params.get("status")
+        if project_status in {value for value, _ in Project.STATUSES}:
+            queryset = queryset.filter(status=project_status)
+        return queryset
 
     def list(self, request, *args, **kwargs):
-        if request.query_params.get("recent_mix") == "true":
-            statuses = ["draft", "submitted", "manager_review", "finance_review", "approved", "rejected"]
-            projects = [
-                project
-                for status in statuses
-                for project in self.get_queryset().filter(status=status)[:2]
-            ]
-            return Response({
-                "count": len(projects),
-                "results": ProjectSerializer(projects, many=True).data,
-            })
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
