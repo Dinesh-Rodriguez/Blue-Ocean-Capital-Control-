@@ -181,6 +181,43 @@ def platform_users(request):
     profile.properties.set(Property.objects.filter(id__in=data.get("property_ids", [])))
     return Response({"id": user.id, "email": user.email, "role": profile.role}, status=201)
 
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def properties(request):
+    profile = request.user.profile
+    if request.method == "POST":
+        if profile.role != "super_admin":
+            return Response({"detail": "Only the Lead Admin can create properties."}, status=status.HTTP_403_FORBIDDEN)
+        organization = Organization.objects.get(id=request.data["organization_id"])
+        property = Property.objects.create(
+            organization=organization,
+            name=request.data["name"],
+            code=request.data["code"],
+        )
+        return Response({"id": property.id, "name": property.name, "code": property.code,
+                         "organization_id": organization.id, "organization_name": organization.name}, status=201)
+    queryset = Property.objects.select_related("organization").order_by("organization_id", "name")
+    if profile.role == "super_admin":
+        pass
+    elif profile.role == "org_admin":
+        queryset = queryset.filter(organization_id=profile.organization_id)
+    else:
+        queryset = queryset.filter(id__in=profile.properties.values("id"))
+    return Response([{
+        "id": property.id,
+        "name": property.name,
+        "code": property.code,
+        "organization_id": property.organization_id,
+        "organization_name": property.organization.name,
+    } for property in queryset])
+
+@api_view(["DELETE"])
+@permission_classes([IsSuperAdmin])
+def property_detail(request, property_id):
+    property = Property.objects.get(id=property_id)
+    property.delete()
+    return Response(status=204)
+
 @api_view(["PATCH", "DELETE"])
 @permission_classes([IsSuperAdmin])
 def platform_user_detail(request, user_id):
